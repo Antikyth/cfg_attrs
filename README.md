@@ -2,6 +2,11 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at https://mozilla.org/MPL/2.0/. -->
 
+# WARNING
+This project is archived because it turns out that using this attribute will place doc comments
+using it before all other doc comments 100% of the time. This is not something that can be changed,
+because it's how attribute proc macros work.
+
 # `#[cfg_attrs(...)]`
 
 Provides an alternative syntax to [`#[cfg_attr(...)]`][cfg_attr] that is easier to use with doc
