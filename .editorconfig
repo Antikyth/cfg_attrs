@@ -1,0 +1,20 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+# What is this? EditorConfig is a file which many text editors natively support, and many others
+# have plugins available to achieve the same, which tells a text editor universal settings that it
+# should use when editing a particular project. This is useful so that a style guide can be
+# maintained throughout the project.
+
+# This declares that this is the .editorconfig file for the whole project, i.e. the root.
+root = true
+
+[*]
+indent_style = tab
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 120

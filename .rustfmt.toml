@@ -1,0 +1,23 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+hard_tabs = true
+combine_control_expr = false
+wrap_comments = true
+comment_width = 100
+max_width = 120
+condense_wildcard_suffixes = true
+format_strings = true
+
+imports_layout = "HorizontalVertical"
+imports_granularity = "Crate"
+merge_imports = true
+group_imports = "StdExternalCrate"
+
+match_block_trailing_comma = true
+normalize_comments = true
+normalize_doc_attributes = true
+unstable_features = true
+use_field_init_shorthand = true
+use_try_shorthand = true
