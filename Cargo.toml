@@ -4,6 +4,8 @@ version = "1.0.0"
 authors = ["Antikyth"]
 description = "An alternative to #[cfg_attr(...)] that is easier to use with doc comments."
 license = "MPL-2.0"
+repository = "https://github.com/Antikyth/cfg_attrs"
+readme = true
 edition = "2021"
 
 [lib]
