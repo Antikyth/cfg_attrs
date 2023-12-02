@@ -7,6 +7,7 @@ use proc_macro2::TokenStream as TokenStream2;
 
 use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
+use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{parse_macro_input, token, Attribute, Error, Meta, Path, Token};
 
@@ -25,6 +26,20 @@ enum Attr {
 
 	/// Not a `#[configure(...)]` attribute.
 	Other(Attribute),
+}
+
+enum AttrMeta<'a> {
+	Configure(&'a ConfigureMeta),
+	Other(&'a Meta),
+}
+
+impl Attr {
+	fn meta(&self) -> AttrMeta<'_> {
+		match self {
+			Self::Configure { meta, .. } => AttrMeta::Configure(meta),
+			Self::Other(Attribute { meta, .. }) => AttrMeta::Other(meta),
+		}
+	}
 }
 
 /// The `$(#[$meta:meta])*` part of `#[cfg_attrs { $(#[$meta:meta])* }]`.
@@ -131,10 +146,19 @@ impl ToTokens for Attr {
 				..
 			} => {
 				hash.to_tokens(tokens);
-				square_bracket.surround(tokens, |tokens| quote!(cfg_attr(#meta)).to_tokens(tokens));
+				square_bracket.surround(tokens, |tokens| meta.to_tokens(tokens));
 			},
 
 			Self::Other(attr) => attr.to_tokens(tokens),
+		}
+	}
+}
+
+impl ToTokens for AttrMeta<'_> {
+	fn to_tokens(&self, tokens: &mut TokenStream2) {
+		match self {
+			Self::Configure(meta) => meta.to_tokens(tokens),
+			Self::Other(meta) => meta.to_tokens(tokens),
 		}
 	}
 }
@@ -151,11 +175,11 @@ impl ToTokens for CfgAttrsMeta {
 
 impl ToTokens for ConfigureMeta {
 	fn to_tokens(&self, tokens: &mut TokenStream2) {
-		self.condition.to_tokens(tokens);
-		self.comma.to_tokens(tokens);
+		let condition = &self.condition;
+		let comma = &self.comma;
+		let metas: Punctuated<_, Token![,]> = self.attrs.iter().map(Attr::meta).collect();
 
-		let attr = &self.attrs;
-		quote!(::cfg_attrs::cfg_attrs { #(#attr)* }).to_tokens(tokens);
+		quote!(cfg_attr(#condition #comma #metas)).to_tokens(tokens);
 	}
 }
 
