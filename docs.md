@@ -1,14 +1,7 @@
 <!-- This Source Code Form is subject to the terms of the Mozilla Public
    - License, v. 2.0. If a copy of the MPL was not distributed with this
-   - file, You can obtain one at https://mozilla.org/MPL/2.0/. --> 
+   - file, You can obtain one at https://mozilla.org/MPL/2.0/. -->
 
-<!-- This `README.md` file is automatically generated from `docs.md`, which uses `rustdoc`'s syntax
-   - to provide documentation for the `#[cfg_attrs { ... }]` macro too.
-   -
-   - See `build.rs` if you're interested to see the code, or edit `docs.md` to edit the
-   - documentation. --> 
-
-# `#[cfg_attrs { ... }]`
 Provides an alternative syntax to [`#[cfg_attr(...)]`][cfg_attr] that is easier to use with doc
 comments.
 
@@ -31,7 +24,7 @@ comments.
 [_ConfigurationPredicate_]: https://doc.rust-lang.org/reference/conditional-compilation.html
 [_OuterAttribute_]: https://doc.rust-lang.org/reference/attributes.html
 
-## Usage
+# Usage
 `#[cfg_attrs { ... }]` should surround all other attributes on the item. A
 `#[configure(<condition>, <attributes>)]` helper attribute is provided within.
 
@@ -54,8 +47,10 @@ might put a `#[cfg_attrs { ... }]` attribute that configures doc comments betwee
 non-configured doc comments, that isn't where it will be expanded to, so the documentation will
 be out of order.
 
-## Examples
-```rust
+# Examples
+```
+# use cfg_attrs::cfg_attrs;
+#
 #[cfg_attrs {
     /// This is an example struct.
     #[configure(
@@ -89,7 +84,9 @@ struct Example;
 
 `#[cfg_attrs(...)]` may also be used with attributes other than doc comments, though there is
 no real benefit to doing this:
-```rust
+```
+# use cfg_attrs::cfg_attrs;
+#
 #[cfg_attrs {
     #[configure(
         feature = "magic",
