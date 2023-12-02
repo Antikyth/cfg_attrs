@@ -33,13 +33,13 @@ fn main() -> io::Result<()> {
 	println!("cargo:rerun-if-changed={INPUT}");
 	println!("cargo:rerun-if-changed={OUTPUT}");
 
-	let input = fs::read_to_string(INPUT)?;
+	if let Ok(input) = fs::read_to_string(INPUT) {
+		let copyright_lines = COPYRIGHT.lines().count() + 1;
 
-	let copyright_lines = COPYRIGHT.lines().count() + 1;
+		let docs: Doc<'_> = input.lines().skip(copyright_lines).collect();
 
-	let docs: Doc<'_> = input.lines().skip(copyright_lines).collect();
-
-	fs::write(OUTPUT, docs.to_string())?;
+		let _ = fs::write(OUTPUT, docs.to_string());
+	}
 
 	Ok(())
 }
