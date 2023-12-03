@@ -7,7 +7,7 @@ comments.
 
 > <sup>Syntax</sup> \
 > _CfgAttrsAttribute_ : \
-> &nbsp;&nbsp;`cfg_attrs` `{` _Attribute_<sup>\*</sup> `}`
+> &nbsp;&nbsp;`cfg_attrs`
 >
 > _Attribute_ : \
 > &nbsp;&nbsp;_ConfigureAttribute_ | [_OuterAttribute_]
@@ -25,61 +25,91 @@ comments.
 [_OuterAttribute_]: https://doc.rust-lang.org/reference/attributes.html
 
 # Usage
-`#[cfg_attrs { ... }]` should surround all other attributes on the item. A
-`#[configure(<condition>, <attributes>)]` helper attribute is provided within.
+Placing `#[cfg_attrs]` on an item enables a `#[configure(<condition>, <attributes>)]` helper
+attribute to be used on that item.
 
 The syntax of that `#[configure(...)]` attribute is much like [`#[cfg_attr(...)]`][cfg_attr], except
 the configured attributes use full attribute syntax. The advantage of this is that doc comments,
 which expand to `#[doc = "..."]` attributes, can be used in the `#[configure(...)]` syntax.
 
-<div class="warning">
-
-All of an item's doc comments should be placed within the `#[cfg_attrs { ... }]` attribute, even
-if they are not being configured. Additionally, the `#[cfg_attrs { ... }]` attribute should only
-appear once per item; `#[configure(...)]` can be used multiple times within it if you want
-multiple usages.
-
-</div>
-
-These restrictions are as a result of how proc-macro attributes work: they are expanded
-separately to other attributes, so their position among other attributes is lost. While you
-might put a `#[cfg_attrs { ... }]` attribute that configures doc comments between two
-non-configured doc comments, that isn't where it will be expanded to, so the documentation will
-be out of order.
-
 # Examples
 ```
 # use cfg_attrs::cfg_attrs;
 #
-#[cfg_attrs {
-    /// This is an example struct.
+#[cfg_attrs]
+/// This is an example struct.
+#[configure(
+    debug_assertions,
+    ///
+    /// Hello! These are docs that only appear when
+    /// debug assertions are active.
+)]
+enum Example {
     #[configure(
-        debug_assertions,
-        ///
-        /// Hello! These are docs that only appear when
-        /// debug assertions are active.
+        feature = "magic",
+        /// Woah! Look at that! It enables
+        /// `#[configure(...)]` for variants too!
     )]
-}]
-struct Example;
+    Point {
+        #[configure(
+            feature = "magic",
+            /// And fields! This is amazing!
+        )]
+        x: i32,
+        y: i32,
+    },
+}
 ```
 This will expand to the following usage of [`#[cfg_attr(...)]`][cfg_attr]:
 ```rust
-/// This is an example struct.
+/// This is an example enum.
 #[cfg_attr(
     debug_assertions,
     doc = "",
     doc = " Hello! These are docs that only appear when",
     doc = " debug assertions are active."
 )]
-struct Example;
+enum Example {
+    #[cfg_attr(
+        feature = "magic",
+        doc = " Woah! Look at that! It enables",
+        doc = " `#[configure(...)]` for variants too!"
+    )]
+    Point {
+        #[cfg_attr(
+            feature = "magic",
+            doc = " And fields! This is amazing!"
+        )]
+        x: i32,
+        y: i32,
+    },
+}
 ```
 Which, if debug assertions are active, would be expanded to:
 ```rust
-/// This is an example struct.
+/// This is an example enum.
 ///
 /// Hello! These are docs that only appear when
 /// debug assertions are active.
-struct Example;
+enum Example {
+    Point {
+        x: i32,
+        y: i32,
+    },
+}
+```
+Or, if the `magic` feature is enabled:
+```rust
+/// This is an example enum.
+enum Example {
+    /// Woah! Look at that! It enables
+    /// `#[configure(...)]` for variants too!
+    Point {
+        /// And fields! This is amazing!
+        x: i32,
+        y: i32,
+    },
+}
 ```
 
 `#[cfg_attrs(...)]` may also be used with attributes other than doc comments, though there is
@@ -87,18 +117,23 @@ no real benefit to doing this:
 ```
 # use cfg_attrs::cfg_attrs;
 #
-#[cfg_attrs {
-    #[configure(
-        feature = "magic",
-        #[sparkles]
-        #[crackles]
-    )]
-}]
+#[cfg_attrs]
+#[configure(
+    feature = "magic",
+    #[sparkles]
+    #[crackles]
+)]
 fn bewitched() {}
 ```
 With that example expanding to:
 ```rust
 #[cfg_attr(feature = "magic", sparkles, crackles)]
+fn bewitched() {}
+```
+And expanding, if the `magic` feature is enabled, to:
+```rust ignore
+#[sparkles]
+#[crackles]
 fn bewitched() {}
 ```
 
